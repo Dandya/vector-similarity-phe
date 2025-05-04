@@ -133,6 +133,12 @@ if __name__ == "__main__":
 			raise Exception("bad input secret key")
 		secret_key = paillier.PaillierPrivateKey(pub_key, sec_j["p"], sec_j["q"])
 
+	if not Path("./emb_faces").exists():
+		Path("./emb_faces").mkdir(parents=True, exist_ok=True)
+
+	if not Path("./src_faces").exists():
+		Path("./src_faces").mkdir(parents=True, exist_ok=True)
+
 	emb_mgr = EmbeddingManager("src_faces", "emb_faces")
 
 	if len(argv) > 3 and update_bool:
