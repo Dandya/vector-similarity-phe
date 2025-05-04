@@ -106,14 +106,17 @@ class EmbeddingManager:
 
 
 if __name__ == "__main__":
-	if len(argv) < 4:
-		print(f"Usage: {argv[0]} PUB_KEY SECRET_KEY PHOTO")
+	if len(argv) < 3:
+		print(f"Usage: {argv[0]} KEYS_PATH PHOTO [update]")
 		exit(0)
 	print("Start scan")
 
-	pub_file = argv[1]
-	secret_file = argv[2]
-	trg_file = argv[3]
+	pub_file = argv[1] + "/pub.key"
+	secret_file = argv[1] + "/secret.key"
+	trg_file = argv[2]
+	update_bool = False
+	if len(argv) > 3 and argv[3] == "update":
+		update_bool = True
 
 	pub_key = None
 	secret_key = None
@@ -132,10 +135,15 @@ if __name__ == "__main__":
 
 	emb_mgr = EmbeddingManager("src_faces", "emb_faces")
 
-	if len(argv) > 3 and argv[3] == "update":
+	if len(argv) > 3 and update_bool:
 		emb_mgr.update_src_emb(pub_key)
 
 	src_embs = emb_mgr.get_embs(pub_key)
+
+	if len(src_embs) == 0:
+		print("Force update source embedding")
+		emb_mgr.update_src_emb(pub_key)
+		src_embs = emb_mgr.get_embs(pub_key)
 
 	print(f"Has {len(src_embs)} peoples in database")
 
