@@ -10,6 +10,7 @@ import json
 import typing
 import os
 import sys
+import time
 
 from torch.nn.modules import EmbeddingBag
 
@@ -50,7 +51,7 @@ class Embedding:
 			self.data[i] = self.data[i] / l
 
 	def encrypt(self, pub: paillier.PaillierPublicKey):
-		bar = IncrementalBar('encrypting', max = len(self.data))
+		bar = IncrementalBar('encrypting', max = len(self.data), suffix="%(percent)d%% %(elapsed_td)s")
 		for i in range(len(self.data)):
 			self.data[i] = pub.encrypt(self.data[i], 1e-10)
 			bar.next()
@@ -58,7 +59,7 @@ class Embedding:
 		self.is_enc = True
 
 	def decrypt(self, dec: paillier.PaillierPrivateKey):
-		bar = IncrementalBar('decrypting', max = len(self.data))
+		bar = IncrementalBar('decrypting', max = len(self.data), suffix="%(percent)d%%")
 		for i in range(len(self.data)):
 			self.data[i] = dec.decrypt(self.data[i])
 			bar.next()
@@ -93,7 +94,6 @@ class Embedding:
 			write_int(int(emb.is_enc), 1, file)
 			l = len(emb.data)
 			write_int(l, 4, file)
-			print(l)
 			for i in range(len(emb.data)):
 				if emb.is_enc:
 					Embedding._save_value(emb.data[i].ciphertext(False), file)
@@ -211,4 +211,6 @@ if __name__ == "__main__":
 	trg_emb = emb_mgr.get_emb(trg_file)
 
 	for i in range(len(src_embs)):
-		print(f"Similary with {src_embs[i][1]}: {secret_key.decrypt(src_embs[i][0].get_cosine_similarity(trg_emb))}")
+		t = time.process_time()
+		print(f"Similary with {src_embs[i][1]}: {abs(secret_key.decrypt(src_embs[i][0].get_cosine_similarity(trg_emb)))}")
+		print(f"Time: {time.process_time() - t}s")
