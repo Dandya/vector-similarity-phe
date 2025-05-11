@@ -207,32 +207,8 @@ if __name__ == "__main__":
 
 	print(f"Has {len(src_embs)} peoples in database")
 
+	print("Getting face embidding")
 	trg_emb = emb_mgr.get_emb(trg_file)
 
 	for i in range(len(src_embs)):
-		print(f"{src_embs[i][1]}: {secret_key.decrypt(src_embs[i][0].get_cosine_similarity(trg_emb))}")
-
-	# data = [1, 2, 3, 4, 5]
-	# # data_tmp = [1, 2, 3, 4, 5]
-
-	# emb1 = Embedding(data, False)
-	# # emb1.normalize()
-	# emb1.encrypt(pub_key)
-
-	# # emb2 = Embedding(data_tmp)
-	# # emb2.normalize()
-	
-	# # print(repr(emb1.data[0]))
-
-
-
-	# # data  = pub_key.encrypt(1)
-	# data_j = {"data": convert_emb_to_list(emb1)}
-	# with open("emb.json", "w") as file:
-	# 	json.dump(data_j, file)
-	# with open("emb.json", "r") as file:
-	# 	data_j = json.load(file)
-	# emb2 = Embedding(data_j["data"], True, {"pub": pub_key})
-	# emb2.decrypt(secret_key)
-	# print(emb2.data)
-	# # print(secret_key.decrypt(emb1.get_cosine_similarity(emb2)))
+		print(f"Similary with {src_embs[i][1]}: {secret_key.decrypt(src_embs[i][0].get_cosine_similarity(trg_emb))}")
