@@ -1,3 +1,7 @@
 venv/
 *.json
+*.bin
 *.key
+env/
+targets/
+.vs/
