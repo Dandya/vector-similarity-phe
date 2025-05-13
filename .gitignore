@@ -5,3 +5,4 @@ venv/
 env/
 targets/
 .vs/
+photo.*

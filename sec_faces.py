@@ -1,3 +1,4 @@
+from types import NoneType
 from facenet_pytorch import MTCNN, InceptionResnetV1
 from phe import paillier
 from sys import argv
@@ -11,6 +12,7 @@ import typing
 import os
 import sys
 import time
+import cv2
 
 from torch.nn.modules import EmbeddingBag
 
@@ -159,6 +161,22 @@ class EmbeddingManager:
 			embs.append((Embedding.load(file, pub_key), file))
 		return embs
 
+class Client:
+	def __init__(self):
+		self.cam = cv2.VideoCapture(0)
+
+	def who_are_you(self) -> str:
+		return input("Your name: ")
+
+	def get_sec_similary(self, sec_src_emb, emb_mgr):
+		print("Cheese!")
+		time.sleep(0.5)
+		ret, frame = self.cam.read()
+		print("Processing...")
+		cv2.imwrite("photo.png", frame)
+		trg_emb = emb_mgr.get_emb("photo.png")
+		return sec_src_emb.get_cosine_similarity(trg_emb)
+
 if __name__ == "__main__":
 	if len(argv) < 3:
 		print(f"Usage: {argv[0]} KEYS_PATH PHOTO [update]")
@@ -207,10 +225,29 @@ if __name__ == "__main__":
 
 	print(f"Has {len(src_embs)} peoples in database")
 
-	print("Getting face embidding")
-	trg_emb = emb_mgr.get_emb(trg_file)
+	if trg_file == "camera":
+		try:
+			client = Client()
+			while True:
+				name = client.who_are_you()
+				src_emb = None
+				for emb in src_embs:
+					if name in str(emb[1]):
+						src_emb = emb
+						break
+				if not isinstance(src_emb, NoneType):
+					t = time.process_time()
+					print(f"Similary with {src_emb[1]}: {abs(secret_key.decrypt(client.get_sec_similary(src_emb[0], emb_mgr)))}")
+					print(f"Time: {time.process_time() - t}s")
+				else:
+					print("Unknown user")
+		except KeyboardInterrupt:
+			exit(0)
+	else:
+		print("Getting face embidding")
+		trg_emb = emb_mgr.get_emb(trg_file)
 
-	for i in range(len(src_embs)):
-		t = time.process_time()
-		print(f"Similary with {src_embs[i][1]}: {abs(secret_key.decrypt(src_embs[i][0].get_cosine_similarity(trg_emb)))}")
-		print(f"Time: {time.process_time() - t}s")
+		for i in range(len(src_embs)):
+			t = time.process_time()
+			print(f"Similary with {src_embs[i][1]}: {abs(secret_key.decrypt(src_embs[i][0].get_cosine_similarity(trg_emb)))}")
+			print(f"Time: {time.process_time() - t}s")
